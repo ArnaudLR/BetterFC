@@ -1,23 +1,22 @@
 // ==UserScript==
 // @name		Better FC
 // @namespace	http://meurgues.fr/greasemonkey
-// @description	version 0.7.0 - Améliore l'ergonomie du Forum Catholique
+// @ version	0.8.0
+// @description	version 0.8.0 - Améliore l'ergonomie du Forum Catholique
 // @copyright	2007+, Arnaud Meurgues
-// @include		http://leforumcatholique.org/forum.php*
-// @include		http://www.leforumcatholique.org/forum.php*
+// @include		http://leforumcatholique.org/*
+// @include		http://www.leforumcatholique.org/*
 // @resource	icon_folded			http://meurgues.fr/images/icon_folded.png
 // @resource	icon_unfolded		http://meurgues.fr/images/icon_unfolded.png
 // @resource	icon_dropdown		http://meurgues.fr/images/icon_drop_down.gif
 // @resource	icon_dropdown_up	http://meurgues.fr/images/icon_drop_down_up.gif
 // @resource	icon_close			http://meurgues.fr/images/icon_close_toast.gif
 // @resource	icon_response		http://meurgues.fr/images/reponse.gif
-// @require		http://jquery-ui.googlecode.com/svn/tags/latest/jquery-1.3.2.js
-// @require		http://jquery-ui.googlecode.com/svn/tags/latest/ui/ui.core.js
-// @require		http://jquery-ui.googlecode.com/svn/tags/latest/ui/ui.draggable.js
-// @require		http://jquery-ui.googlecode.com/svn/tags/latest/ui/ui.resizable.js
-// @require		http://jquery-ui.googlecode.com/svn/tags/latest/ui/ui.dialog.js
+// @require		http://code.jquery.com/jquery.min.js
+// @require		http://meurgues.fr/jquery/jquery-ui.js
 // ==/UserScript==
 
+// 0.8.0 - utilisation exclusive de jquery. Portage sur Chrome
 // 0.7.0 - modification de la preview des message par dialog modal (jquery ui)
 //         escape ferme la fenêtre de preview
 // 0.6.1 - conservation du nombre de lisure (title du lien)
@@ -56,7 +55,6 @@ function Fold(msgid) {
 }
 
 function ConfigWindow() {
-	GM_log('new config window')
 	this.toggle = ConfigWindow_toggle
 
 	this.main     = document.createElement('div')
@@ -358,13 +356,40 @@ function ReWrite(par) {
   
 }
 
+
+function makeURI(aURL) {  
+	GM_log('makeURI')
+	var ioService = Components.classes["@mozilla.org/network/io-service;1"]  
+							.getService(Components.interfaces.nsIIOService);  
+	return ioService.newURI(aURL, null, null);  
+}  
+
+function addToHistory(aUrl) {
+	GM_log('addToHistory')
+	var historyService = Components.classes["@mozilla.org/browser/nav-history-service;1"]
+                               .getService(Components.interfaces.nsINavHistoryService);
+	if (historyService != null) {
+		GM_log('adding URI')
+		historyService.addURI(makeURI(aUrl),false,true,makeURI(document.URL))
+	} else
+		GM_log('no history service avalaible')
+}
+
+
 function Init() {
 	// css files pour jquery ui
-	$('head').append("<link href='http://jquery-ui.googlecode.com/svn/tags/latest/themes/humanity/ui.all.css' type='text/css' rel='stylesheet'>");
+	//$('head').append("<link href='http://jquery-ui.googlecode.com/svn/tags/latest/themes/humanity/ui.all.css' type='text/css' rel='stylesheet'>");
 
+	var elementCount = $("a").length;
+	$("body").prepend("<h3>" + elementCount + " elements found</h3>");
+	
+	$("body").css("background","#ffeeee");
+	$("body").style.background = "#6699cc";
+	
 	if (GM_getValue("background")) {
 	  body = document.getElementsByTagName('BODY')[0]
 	  body.style.background = document.defaultColor;
+	} else {
 	}
 
 	// reformater les fils de discussion
@@ -423,6 +448,7 @@ function Init() {
 							table = tables[0];
 							table = table.lastChild.lastChild.previousSibling.firstChild.firstChild.nextSibling
 
+							//addToHistory(a.href)
 							BuildWindow(a.text,table)
 							//$(".preview").dialog("open");
 						}
@@ -443,4 +469,127 @@ function Init() {
 	*/
 }
 
-Init();
+function addJQuery(callback) {
+  var script = document.createElement("script");
+  script.setAttribute("src", "http://code.jquery.com/jquery.min.js");
+  script.addEventListener('load', function() {
+    var script = document.createElement("script");
+    script.textContent = "(" + callback.toString() + ")();";
+    document.body.appendChild(script);
+  }, false);
+  document.body.appendChild(script);
+}
+
+function NbSpaces(text) {
+
+}
+
+// the guts of this userscript
+function main() {
+	var elementCount = $("a").length;
+
+	$("div[float='right']").hide();
+	$("body").css("background","#6699cc");
+	$("p.msg").css("background","#eeeeff");
+	
+	// remove the useless <span id="filxxxxxx"> into p.msg
+	$("p.msg > span")  // find span
+		.find("img")   // find any node inside the span
+		.unwrap();     // remove content node
+	
+	// rewrite each thread as hierarchical html
+	var items = $("p.msg").each(function(index) {
+		function NextItem(html) {
+			var idx = html.indexOf("<br>");
+			var line;
+			var block;
+			var indent=0;
+			
+			if (idx==-1) {
+			  line = html;
+			  block = 0;
+			} else {
+				line = html.slice(0,idx);
+				block = html.slice(idx+5);
+			}
+			while (line.indexOf("&nbsp;")==0) {
+				indent++;
+				line = line.slice(6);
+			}
+			return { item: line, rest: block, indent: indent/4 };
+		}
+
+		var stack = new Array();
+		var currentIndent = 0;
+
+		var next;
+		var text = $(this).html();
+		
+		do {
+			current = NextItem(text);
+			
+			if (current.indent == currentIndent) { // même indentation => juxtaposés
+				var concat = '';
+				if (stack.length>0) { // on concatène 
+					concat = stack[stack.length-1];
+					stack.pop();
+				}
+				concat += "<div class='threadItem'>" + current.item + "</div>";
+				stack.push(concat);
+			} else if (current.indent > currentIndent) { // on indente => on empile
+				currentIndent++;
+				stack.push("<div class='threadItem'>" + current.item + "</div>");
+			} else { // on désindente => on dépile en threadant
+				while (current.indent < currentIndent) {
+					var concat = '';
+					
+					// last stack item is a thread
+					concat = "<div class='thread'>" + stack[stack.length-1] + "</div>";
+					stack.pop();
+					
+					// the thread must be concatenated to previous item
+					concat = stack[stack.length-1] + concat;
+					stack.pop();
+					
+					stack.push(concat);
+					
+					currentIndent--;
+				}
+				// The new item is concatened to the whole previous thread
+				concat = stack[stack.length-1];
+				stack.pop();
+				
+				concat += "<div class='threadItem'>" + current.item + "</div>";
+				stack.push(concat);
+			} 
+			text = current.rest;
+		} while (text != 0);
+		
+		var concat = '';
+		// on finit de dépiler
+		while (currentIndent>0) {
+			var concat = '';
+			
+			// last stack item is a thread
+			concat = "<div class='thread'>" + stack[stack.length-1] + "</div>";
+			stack.pop();
+			
+			// the thread must be concatenated to previous item
+			concat = stack[stack.length-1] + concat;
+			stack.pop();
+			
+			stack.push(concat);
+			
+			currentIndent--;
+		}
+		
+		$(this).html("<div class='thread'>" + stack[stack.length-1] + "</div>");
+		stack.pop();
+		stack=null;
+		
+	});
+	$("div.thread").css("margin-left","5mm");
+}
+
+// load jQuery and execute the main function
+addJQuery(main);
