@@ -1,28 +1,32 @@
 // ==UserScript==
-// @name		Better FC
-// @namespace	http://meurgues.fr/greasemonkey
-// @ version	0.8.0
-// @description	version 0.8.0 - Améliore l'ergonomie du Forum Catholique
-// @copyright	2007+, Arnaud Meurgues
-// @include		http://leforumcatholique.org/*
-// @include		http://www.leforumcatholique.org/*
-// @resource	icon_folded			http://meurgues.fr/images/icon_folded.png
-// @resource	icon_unfolded		http://meurgues.fr/images/icon_unfolded.png
-// @resource	icon_dropdown		http://meurgues.fr/images/icon_drop_down.gif
-// @resource	icon_dropdown_up	http://meurgues.fr/images/icon_drop_down_up.gif
-// @resource	icon_close			http://meurgues.fr/images/icon_close_toast.gif
-// @resource	icon_response		http://meurgues.fr/images/reponse.gif
-// @require		http://code.jquery.com/jquery.min.js
-// @require		http://meurgues.fr/jquery/jquery-ui.js
+// @name    Better FC
+// @namespace http://meurgues.fr/greasemonkey
+// @ version  0.8.1
+// @description version 0.8.1 - Améliore l'ergonomie du Forum Catholique
+// @copyright 2007+, Arnaud Meurgues
+// @include   http://leforumcatholique.org/forum.php*
+// @include   http://www.leforumcatholique.org/forum.php*
+// @resource  icon_folded     http://meurgues.fr/images/icon_folded.png
+// @resource  icon_unfolded   http://meurgues.fr/images/icon_unfolded.png
+// @resource  icon_dropdown   http://meurgues.fr/images/icon_drop_down.gif
+// @resource  icon_dropdown_up  http://meurgues.fr/images/icon_drop_down_up.gif
+// @resource  icon_close      http://meurgues.fr/images/icon_close_toast.gif
+// @resource  icon_response   http://meurgues.fr/images/reponse.gif
+// @require   http://meurgues.fr/jquery/jquery.js
+// @require   http://meurgues.fr/jquery/jquery-ui.js
 // ==/UserScript==
 
+// 0.8.1 - 0.8.0 non fonctionnelle. 
+//         Suppression du mécanisme addJQuery(). modification localisation css:
+//         http://jquery-ui.googlecode.com/svn/tags/1.8.5/themes/redmond/jquery.ui.all.css
 // 0.8.0 - utilisation exclusive de jquery. Portage sur Chrome
 // 0.7.0 - modification de la preview des message par dialog modal (jquery ui)
 //         escape ferme la fenêtre de preview
 // 0.6.1 - conservation du nombre de lisure (title du lien)
 // 0.6.0 - intégration de JQuery
 
-document.defaultColor = "#6699cc"
+document.defaultColor = "#6699cc";
+
 var allTextareas, thisTextarea;
 
 function indentLevel(spaces) {
@@ -55,37 +59,37 @@ function Fold(msgid) {
 }
 
 function ConfigWindow() {
-	this.toggle = ConfigWindow_toggle
+  this.toggle = ConfigWindow_toggle
 
-	this.main     = document.createElement('div')
-	this.main.style.position = 'fixed'
-	this.main.style.top  = 0
-	this.main.style.left = 0
-	this.main.style.background = 'white'
-	this.main.style.zIndex = 9999
-	//this.main.style.border = "black solid 1px"
+  this.main     = document.createElement('div')
+  this.main.style.position = 'fixed'
+  this.main.style.top  = 0
+  this.main.style.left = 0
+  this.main.style.background = 'white'
+  this.main.style.zIndex = 9999
+  //this.main.style.border = "black solid 1px"
  
-	this.titlebar = document.createElement('div')
-	this.main.appendChild(this.titlebar)
-	this.titlebar.style.border = "black solid 1px"
-	
-	open = document.createElement('img')
-	this.titlebar.appendChild(open)
-	open.src = GM_getValue("config") ? 'http://meurgues.fr/images/icon_drop_down.gif' : 'http://meurgues.fr/images/icon_drop_down_up.gif'
-	open.addEventListener('click',
-		function (e) {
-			document.configWindow.toggle()
-		},
-		false
-	);
+  this.titlebar = document.createElement('div')
+  this.main.appendChild(this.titlebar)
+  this.titlebar.style.border = "black solid 1px"
+  
+  open = document.createElement('img')
+  this.titlebar.appendChild(open)
+  open.src = GM_getValue("config") ? 'http://meurgues.fr/images/icon_drop_down.gif' : 'http://meurgues.fr/images/icon_drop_down_up.gif'
+  open.addEventListener('click',
+    function (e) {
+      document.configWindow.toggle()
+    },
+    false
+  );
 
-	title = document.createElement('span')
-	this.titlebar.appendChild(title)
-	title.textContent = " Fenêtre de Configuration"
+  title = document.createElement('span')
+  this.titlebar.appendChild(title)
+  title.textContent = " Fenêtre de Configuration"
 
-	this.content  = document.createElement('div')
-	this.main.appendChild(this.content)
-	this.content.style.display = GM_getValue("config") ? 'block' : 'none'
+  this.content  = document.createElement('div')
+  this.main.appendChild(this.content)
+  this.content.style.display = GM_getValue("config") ? 'block' : 'none'
   
       opacity = document.createElement('div')
         box = document.createElement('input')
@@ -179,17 +183,17 @@ function PreviewWindow(title) {
 }
   
 function BuildWindow(titre,content) {
-	var dialog = document.createElement('div')
-	dialog.title = "no title"
-	dialog.appendChild(content)
-	
-	// add preview element to the body
-	body = document.getElementsByTagName('BODY')[0];
-	body.appendChild(dialog);
+  var dialog = document.createElement('div')
+  dialog.title = "no title"
+  dialog.appendChild(content)
   
-	dialogwidth = window.innerWidth*4/5;
-	dialogheight = window.innerHeight*4/5;
-	$(dialog).dialog({draggable: false, resizable: true, title: titre, height: dialogheight, width: dialogwidth, modal: true});
+  // add preview element to the body
+  body = document.getElementsByTagName('BODY')[0];
+  body.appendChild(dialog);
+  
+  dialogwidth = window.innerWidth*4/5;
+  dialogheight = window.innerHeight*4/5;
+  $(dialog).dialog({draggable: true, resizable: true, title: titre, height: dialogheight, width: dialogwidth, modal: true});
 }
 
 function Color(diff) {
@@ -231,92 +235,92 @@ function ReWrite(par) {
     }
     
     if (child) {
-    	child = child.nextSibling;
-  	indentSpaces = nodes[0].length;
-  	if (indentSpaces > currentIndentSpaces) { // increases indentation
-  	  if (GM_getValue(msgnb)=='folded') {
-  	    if (currentIndent>0)
-  	      text += "<img class='folding' src='http://meurgues.fr/images/icon_folded.png' />";
-  	    text += "<ul style='list-style-type: none; margin-left: 0mm; padding-left: 1em; display: none'>\n<li>";	  
-  	  } else {
-  	    if (currentIndent>0)
-  	      text += "<img class='folding' src='http://meurgues.fr/images/icon_unfolded.png' />";
-  	    text += "<ul style='list-style-type: none; margin-left: 0mm; padding-left: 1em;'>\n<li>";	  
-  	  }
-  	  currentIndent++;
-  	} else if (indentSpaces < currentIndentSpaces) { // decreases indentation
-  	  while (currentIndent > indentLevel(indentSpaces)) {
-  	  	text += "</li>\n</ul>\n"; 	  	
-  	  	currentIndent--;
-  	  }
-  	  text += "<li>"
-  	} else { // same indentation
-  	  text += "</li>\n<li>";
+      child = child.nextSibling;
+    indentSpaces = nodes[0].length;
+    if (indentSpaces > currentIndentSpaces) { // increases indentation
+      if (GM_getValue(msgnb)=='folded') {
+        if (currentIndent>0)
+          text += "<img class='folding' src='http://meurgues.fr/images/icon_folded.png' />";
+        text += "<ul style='list-style-type: none; margin-left: 0mm; padding-left: 1em; display: none'>\n<li>";   
+      } else {
+        if (currentIndent>0)
+          text += "<img class='folding' src='http://meurgues.fr/images/icon_unfolded.png' />";
+        text += "<ul style='list-style-type: none; margin-left: 0mm; padding-left: 1em;'>\n<li>";   
+      }
+      currentIndent++;
+    } else if (indentSpaces < currentIndentSpaces) { // decreases indentation
+      while (currentIndent > indentLevel(indentSpaces)) {
+        text += "</li>\n</ul>\n";       
+        currentIndent--;
+      }
+      text += "<li>"
+    } else { // same indentation
+      text += "</li>\n<li>";
 
-  	}
-  	currentIndentSpaces = indentSpaces;
+    }
+    currentIndentSpaces = indentSpaces;
 
-  	// look for date,
-  	var diff = -1;
-  	op = nodes[4].nodeValue.lastIndexOf('(');
-  	cp = nodes[4].nodeValue.lastIndexOf(')');
-  	if (op!=cp) {
-  	  timetext = nodes[4].nodeValue.slice(op+1,cp);
-  	  cp = timetext.lastIndexOf(' ');
-  	
-	  datetext = timetext.slice(0,cp);
-	  hourtext = timetext.slice(cp+1);
+    // look for date,
+    var diff = -1;
+    op = nodes[4].nodeValue.lastIndexOf('(');
+    cp = nodes[4].nodeValue.lastIndexOf(')');
+    if (op!=cp) {
+      timetext = nodes[4].nodeValue.slice(op+1,cp);
+      cp = timetext.lastIndexOf(' ');
+    
+    datetext = timetext.slice(0,cp);
+    hourtext = timetext.slice(cp+1);
  
-  	  sep = datetext.lastIndexOf('-');
-  	  dayvalue = datetext.slice(sep+1);
-  	  while (dayvalue[0]=='0') dayvalue = dayvalue.substring(1);
-  	  day = parseInt(dayvalue);
-  	  
-  	  datetext = datetext.slice(0,sep);
-  	  sep = datetext.lastIndexOf('-');
-  	  monthvalue = datetext.slice(sep+1);
-  	  while (monthvalue[0]=='0') monthvalue = monthvalue.substring(1);
-  	  month = parseInt(monthvalue);
-  	  
-  	  datetext = datetext.slice(0,sep);
-  	  year = parseInt(datetext);
-  	   	  
-  	  sep = hourtext.lastIndexOf(":");
-  	  secvalue = hourtext.slice(sep+1);
-  	  while (secvalue[0]=='0') secvalue = secvalue.substring(1); if (secvalue.length==0) secvalue="0";
-  	  sec = parseInt(secvalue);
-  	  
-  	  hourtext = hourtext.slice(0,sep);
-  	  sep = hourtext.lastIndexOf(':');
-  	  minvalue = hourtext.slice(sep+1);
-  	  while (minvalue[0]=='0') minvalue = minvalue.substring(1); if (minvalue.length==0) minvalue="0";
-  	  min = parseInt(minvalue);
-  	  
-  	  hourtext = hourtext.slice(0,sep);
-  	  while (hourtext[0]=='0') hourtext = hourtext.substring(1); if (hourtext.length==0) hourtext="0";
-  	  hour = parseInt(hourtext);
-  	   	  
-  	  msgdate = new Date();
-  	  msgdate.setFullYear(year);
-  	  msgdate.setMonth(month-1);
-  	  msgdate.setDate(day);
-  	  msgdate.setHours(hour);
-  	  msgdate.setMinutes(min);
-  	  msgdate.setSeconds(sec);
-  	  
-  	  // compute the color according to the difference with the current date
-  	  now = new Date();
-  	  diff = (now.getTime() - msgdate.getTime())/1000; // diff in seconds
-  	}
-	
-	msgnb = nodes[3].href.slice(nodes[3].href.lastIndexOf('=')+1);
-  	text +=  "<img class='humeur' src='" + nodes[1].src + "' /><a class='msg' id='" + msgnb + "' href=" + nodes[3].href + ' title="' + nodes[3].title + '" > ' + nodes[3].innerHTML + "</a>" + "<span style='color: " + Color(diff) + "'>" + nodes[4].nodeValue + "</span>";
-	text += "<form style='display: inline' method='post' action='reponseN.php'>" +
-	        "<input border='0' src='http://meurgues.fr/images/reponse.gif' type='image' class='login' value='submit' />"+
-	        "<input type='hidden' value='" + msgnb + "' name='num'>" +
-	        "</form>"
+      sep = datetext.lastIndexOf('-');
+      dayvalue = datetext.slice(sep+1);
+      while (dayvalue[0]=='0') dayvalue = dayvalue.substring(1);
+      day = parseInt(dayvalue);
+      
+      datetext = datetext.slice(0,sep);
+      sep = datetext.lastIndexOf('-');
+      monthvalue = datetext.slice(sep+1);
+      while (monthvalue[0]=='0') monthvalue = monthvalue.substring(1);
+      month = parseInt(monthvalue);
+      
+      datetext = datetext.slice(0,sep);
+      year = parseInt(datetext);
+          
+      sep = hourtext.lastIndexOf(":");
+      secvalue = hourtext.slice(sep+1);
+      while (secvalue[0]=='0') secvalue = secvalue.substring(1); if (secvalue.length==0) secvalue="0";
+      sec = parseInt(secvalue);
+      
+      hourtext = hourtext.slice(0,sep);
+      sep = hourtext.lastIndexOf(':');
+      minvalue = hourtext.slice(sep+1);
+      while (minvalue[0]=='0') minvalue = minvalue.substring(1); if (minvalue.length==0) minvalue="0";
+      min = parseInt(minvalue);
+      
+      hourtext = hourtext.slice(0,sep);
+      while (hourtext[0]=='0') hourtext = hourtext.substring(1); if (hourtext.length==0) hourtext="0";
+      hour = parseInt(hourtext);
+          
+      msgdate = new Date();
+      msgdate.setFullYear(year);
+      msgdate.setMonth(month-1);
+      msgdate.setDate(day);
+      msgdate.setHours(hour);
+      msgdate.setMinutes(min);
+      msgdate.setSeconds(sec);
+      
+      // compute the color according to the difference with the current date
+      now = new Date();
+      diff = (now.getTime() - msgdate.getTime())/1000; // diff in seconds
+    }
+  
+  msgnb = nodes[3].href.slice(nodes[3].href.lastIndexOf('=')+1);
+    text +=  "<img class='humeur' src='" + nodes[1].src + "' /><a class='msg' id='" + msgnb + "' href=" + nodes[3].href + ' title="' + nodes[3].title + '" > ' + nodes[3].innerHTML + "</a>" + "<span style='color: " + Color(diff) + "'>" + nodes[4].nodeValue + "</span>";
+  text += "<form style='display: inline' method='post' action='reponseN.php'>" +
+          "<input border='0' src='http://meurgues.fr/images/reponse.gif' type='image' class='login' value='submit' />"+
+          "<input type='hidden' value='" + msgnb + "' name='num'>" +
+          "</form>"
     } else 
-    	done = true;
+      done = true;
   }
 
   // close all the unclosed indentations, if remaining
@@ -358,120 +362,116 @@ function ReWrite(par) {
 
 
 function makeURI(aURL) {  
-	GM_log('makeURI')
-	var ioService = Components.classes["@mozilla.org/network/io-service;1"]  
-							.getService(Components.interfaces.nsIIOService);  
-	return ioService.newURI(aURL, null, null);  
+  GM_log('makeURI')
+  var ioService = Components.classes["@mozilla.org/network/io-service;1"]  
+              .getService(Components.interfaces.nsIIOService);  
+  return ioService.newURI(aURL, null, null);  
 }  
 
 function addToHistory(aUrl) {
-	GM_log('addToHistory')
-	var historyService = Components.classes["@mozilla.org/browser/nav-history-service;1"]
+  GM_log('addToHistory')
+  var historyService = Components.classes["@mozilla.org/browser/nav-history-service;1"]
                                .getService(Components.interfaces.nsINavHistoryService);
-	if (historyService != null) {
-		GM_log('adding URI')
-		historyService.addURI(makeURI(aUrl),false,true,makeURI(document.URL))
-	} else
-		GM_log('no history service avalaible')
+  if (historyService != null) {
+    GM_log('adding URI')
+    historyService.addURI(makeURI(aUrl),false,true,makeURI(document.URL))
+  } else
+    GM_log('no history service avalaible')
 }
 
 
 function Init() {
-	// css files pour jquery ui
-	//$('head').append("<link href='http://jquery-ui.googlecode.com/svn/tags/latest/themes/humanity/ui.all.css' type='text/css' rel='stylesheet'>");
+  // css files pour jquery ui
+  $('head').append("<link href='http://jquery-ui.googlecode.com/svn/tags/1.8.5/themes/redmond/jquery.ui.all.css' type='text/css' rel='stylesheet'>");
 
-	var elementCount = $("a").length;
-	$("body").prepend("<h3>" + elementCount + " elements found</h3>");
-	
-	$("body").css("background","#ffeeee");
-	$("body").style.background = "#6699cc";
-	
-	if (GM_getValue("background")) {
-	  body = document.getElementsByTagName('BODY')[0]
-	  body.style.background = document.defaultColor;
-	} else {
-	}
+  if (GM_getValue("background")) {
+    body = document.getElementsByTagName('BODY')[0]
+    body.style.background = document.defaultColor;
+  }
 
-	// reformater les fils de discussion
-	allTextareas = document.getElementsByTagName('P');
-	for (var i = 0; i < allTextareas.length; i++) {
-	    thisTextarea = allTextareas[i];
-	    ReWrite(thisTextarea);
-	}
+  // reformater les fils de discussion
+  allTextareas = document.getElementsByTagName('P');
+  for (var i = 0; i < allTextareas.length; i++) {
+      thisTextarea = allTextareas[i];
+      ReWrite(thisTextarea);
+  }
 
-	// ajouter le folding
-	allTextareas = Array.filter( document.getElementsByTagName('img'), function(elem){
-	   return elem.className == 'folding';
-	 });
-	for (var i = 0; i < allTextareas.length; i++) {
-	    thisTextarea = allTextareas[i];
-	    thisTextarea.addEventListener('click',
-	                                  function (e) {
-	                                    img=e.currentTarget;
-	                                    a = img.previousSibling.previousSibling.previousSibling;
-	                                    msgid = a.id;
-	                                    if (img.nextSibling.style.display!='none') {
-	                                      img.src = 'http://meurgues.fr/images/icon_folded.png';
-																				$(img.nextSibling).slideToggle();
-	                                      GM_setValue(msgid,'folded');
-	                                    } else {
-	                                      img.src = 'http://meurgues.fr/images/icon_unfolded.png';
-																				$(img.nextSibling).slideToggle();
-	                                      GM_setValue(msgid,'unfolded');
-	                                    }
-	                                  },
-	                                  false);
-	}
+  // ajouter le folding
+  allTextareas = Array.filter( document.getElementsByTagName('img'), function(elem){
+     return elem.className == 'folding';
+   });
+  for (var i = 0; i < allTextareas.length; i++) {
+      thisTextarea = allTextareas[i];
+      thisTextarea.addEventListener('click',
+                                    function (e) {
+                                      img=e.currentTarget;
+                                      a = img.previousSibling.previousSibling.previousSibling;
+                                      msgid = a.id;
+                                      if (img.nextSibling.style.display!='none') {
+                                        img.src = 'http://meurgues.fr/images/icon_folded.png';
+                                        $(img.nextSibling).slideToggle();
+                                        GM_setValue(msgid,'folded');
+                                      } else {
+                                        img.src = 'http://meurgues.fr/images/icon_unfolded.png';
+                                        $(img.nextSibling).slideToggle();
+                                        GM_setValue(msgid,'unfolded');
+                                      }
+                                    },
+                                    false);
+  }
 
-	// ajouter la preview des messages
-	allTextareas = Array.filter(document.getElementsByTagName('img'),
-	                            function(elem) { return elem.className == 'humeur';}
-	                           );
-	for (var i = 0; i < allTextareas.length; i++) {
-	    thisTextarea = allTextareas[i];
-	    
-	    thisTextarea.addEventListener('click',
-			function (e) {
-				a=e.currentTarget.nextSibling;	
+  // ajouter la preview des messages
+  allTextareas = Array.filter(document.getElementsByTagName('img'),
+                              function(elem) { return elem.className == 'humeur';}
+                             );
+  for (var i = 0; i < allTextareas.length; i++) {
+      thisTextarea = allTextareas[i];
+      
+      thisTextarea.addEventListener('click',
+      function (e) {
+        a=e.currentTarget.nextSibling;  
 
-				requestPage(a.href,
-					function (xhr) {
-						if (xhr.readyState == 4) {
-							text = xhr.responseText;
+        requestPage(a.href,
+          function (xhr) {
+            if (xhr.readyState == 4) {
+              text = xhr.responseText;
 
-							preparepreview = document.createElement('div')
-							preparepreview.innerHTML = text;
-							tables = Array.filter(preparepreview.getElementsByTagName('table'),
-										function(elem){ 
-											return elem.className == 'dispmsg';
-										}                                                                       );
-							table = tables[0];
-							table = table.lastChild.lastChild.previousSibling.firstChild.firstChild.nextSibling
+              preparepreview = document.createElement('div')
+              preparepreview.innerHTML = text;
+              tables = Array.filter(preparepreview.getElementsByTagName('table'),
+                    function(elem){ 
+                      return elem.className == 'dispmsg';
+                    }                                                                       );
+              table = tables[0];
+              table = table.lastChild.lastChild.previousSibling.firstChild.firstChild.nextSibling
 
-							//addToHistory(a.href)
-							BuildWindow(a.text,table)
-							//$(".preview").dialog("open");
-						}
-					}
-				);
-			},false
-		);
-	}
+              //addToHistory(a.href)
+              BuildWindow(a.text,table)
+              //$(".preview").dialog("open");
+            }
+          }
+        );
+      },false
+    );
+  }
 
-	configwindow = new ConfigWindow()
+  configwindow = new ConfigWindow()
 
-	body.style.backgroundAttachment = 'fixed';
-	// fleur de lys centrale en fond
-	/*
-	body.style.backgroundImage = "url(http://www.temple-of-flora.com/images/500/fleur-de-lys_500.jpg)";
-	body.style.backgroundPosition = 'center';
-	body.style.backgroundRepeat = 'no-repeat';
-	*/
+  body.style.backgroundAttachment = 'fixed';
+
+    // fleur de lys centrale en fond
+  /*
+  body.style.backgroundImage = "url(http://www.temple-of-flora.com/images/500/fleur-de-lys_500.jpg)";
+  body.style.backgroundPosition = 'center';
+  body.style.backgroundRepeat = 'no-repeat';
+  */
 }
+
+Init();
 
 function addJQuery(callback) {
   var script = document.createElement("script");
-  script.setAttribute("src", "http://code.jquery.com/jquery.min.js");
+  script.setAttribute("src", "http://meurgues.fr/jquery/jquery.js");
   script.addEventListener('load', function() {
     var script = document.createElement("script");
     script.textContent = "(" + callback.toString() + ")();";
@@ -480,116 +480,10 @@ function addJQuery(callback) {
   document.body.appendChild(script);
 }
 
-function NbSpaces(text) {
-
-}
-
 // the guts of this userscript
 function main() {
-	var elementCount = $("a").length;
-
-	$("div[float='right']").hide();
-	$("body").css("background","#6699cc");
-	$("p.msg").css("background","#eeeeff");
-	
-	// remove the useless <span id="filxxxxxx"> into p.msg
-	$("p.msg > span")  // find span
-		.find("img")   // find any node inside the span
-		.unwrap();     // remove content node
-	
-	// rewrite each thread as hierarchical html
-	var items = $("p.msg").each(function(index) {
-		function NextItem(html) {
-			var idx = html.indexOf("<br>");
-			var line;
-			var block;
-			var indent=0;
-			
-			if (idx==-1) {
-			  line = html;
-			  block = 0;
-			} else {
-				line = html.slice(0,idx);
-				block = html.slice(idx+5);
-			}
-			while (line.indexOf("&nbsp;")==0) {
-				indent++;
-				line = line.slice(6);
-			}
-			return { item: line, rest: block, indent: indent/4 };
-		}
-
-		var stack = new Array();
-		var currentIndent = 0;
-
-		var next;
-		var text = $(this).html();
-		
-		do {
-			current = NextItem(text);
-			
-			if (current.indent == currentIndent) { // même indentation => juxtaposés
-				var concat = '';
-				if (stack.length>0) { // on concatène 
-					concat = stack[stack.length-1];
-					stack.pop();
-				}
-				concat += "<div class='threadItem'>" + current.item + "</div>";
-				stack.push(concat);
-			} else if (current.indent > currentIndent) { // on indente => on empile
-				currentIndent++;
-				stack.push("<div class='threadItem'>" + current.item + "</div>");
-			} else { // on désindente => on dépile en threadant
-				while (current.indent < currentIndent) {
-					var concat = '';
-					
-					// last stack item is a thread
-					concat = "<div class='thread'>" + stack[stack.length-1] + "</div>";
-					stack.pop();
-					
-					// the thread must be concatenated to previous item
-					concat = stack[stack.length-1] + concat;
-					stack.pop();
-					
-					stack.push(concat);
-					
-					currentIndent--;
-				}
-				// The new item is concatened to the whole previous thread
-				concat = stack[stack.length-1];
-				stack.pop();
-				
-				concat += "<div class='threadItem'>" + current.item + "</div>";
-				stack.push(concat);
-			} 
-			text = current.rest;
-		} while (text != 0);
-		
-		var concat = '';
-		// on finit de dépiler
-		while (currentIndent>0) {
-			var concat = '';
-			
-			// last stack item is a thread
-			concat = "<div class='thread'>" + stack[stack.length-1] + "</div>";
-			stack.pop();
-			
-			// the thread must be concatenated to previous item
-			concat = stack[stack.length-1] + concat;
-			stack.pop();
-			
-			stack.push(concat);
-			
-			currentIndent--;
-		}
-		
-		$(this).html("<div class='thread'>" + stack[stack.length-1] + "</div>");
-		stack.pop();
-		stack=null;
-		
-	});
-	$("div.thread").css("margin-left","5mm");
+  Init();
 }
 
 // load jQuery and execute the main function
-addJQuery(main);
+//addJQuery(main);
