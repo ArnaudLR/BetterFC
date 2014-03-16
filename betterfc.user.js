@@ -1,7 +1,8 @@
 // ==UserScript==
 // @name		Better FC
 // @namespace	http://meurgues.fr/greasemonkey
-// @description	version 0.6.1 - Améliore l'ergonomie du Forum Catholique
+// @description	version 0.7.0 - Améliore l'ergonomie du Forum Catholique
+// @copyright	2007+, Arnaud Meurgues
 // @include		http://leforumcatholique.org/forum.php*
 // @include		http://www.leforumcatholique.org/forum.php*
 // @resource	icon_folded			http://meurgues.fr/images/icon_folded.png
@@ -10,22 +11,17 @@
 // @resource	icon_dropdown_up	http://meurgues.fr/images/icon_drop_down_up.gif
 // @resource	icon_close			http://meurgues.fr/images/icon_close_toast.gif
 // @resource	icon_response		http://meurgues.fr/images/reponse.gif
+// @require		http://jquery-ui.googlecode.com/svn/tags/latest/jquery-1.3.2.js
+// @require		http://jquery-ui.googlecode.com/svn/tags/latest/ui/ui.core.js
+// @require		http://jquery-ui.googlecode.com/svn/tags/latest/ui/ui.draggable.js
+// @require		http://jquery-ui.googlecode.com/svn/tags/latest/ui/ui.resizable.js
+// @require		http://jquery-ui.googlecode.com/svn/tags/latest/ui/ui.dialog.js
 // ==/UserScript==
 
+// 0.7.0 - modification de la preview des message par dialog modal (jquery ui)
+//         escape ferme la fenêtre de preview
 // 0.6.1 - conservation du nombre de lisure (title du lien)
 // 0.6.0 - intégration de JQuery
-
-function include(fileName) {
-	if (document.getElementsByTagName) {
-		Script = document.createElement("script");
-		Script.type = "text/javascript";
-		Script.src = fileName;
-		Body = document.getElementsByTagName("BODY");
-		if (Body) {
-			Body[0].appendChild(Script);
-		}
-	}
-}
 
 document.defaultColor = "#6699cc"
 var allTextareas, thisTextarea;
@@ -60,35 +56,38 @@ function Fold(msgid) {
 }
 
 function ConfigWindow() {
-  this.toggle = ConfigWindow_toggle
-  
-  this.main     = document.createElement('div')
-    this.main.style.position = 'fixed'
-    this.main.style.top  = 0
-    this.main.style.left = 0
-    this.main.style.background = 'white'
-    this.main.style.zIndex = 9999
-    //this.main.style.border = "black solid 1px"
-  
-    this.titlebar = document.createElement('div')
-      this.main.appendChild(this.titlebar)
-      this.titlebar.style.border = "black solid 1px"
-      
-      open = document.createElement('img')
-        this.titlebar.appendChild(open)
-        open.src = GM_getValue("config") ? 'http://meurgues.fr/images/icon_drop_down.gif' : 'http://meurgues.fr/images/icon_drop_down_up.gif'
-        open.addEventListener('click',
-                              function (e) {
-                                document.configWindow.toggle()
-                              },
-                              false);
-      title = document.createElement('span')
-        this.titlebar.appendChild(title)
-        title.textContent = " Fenêtre de Configuration"
+	GM_log('new config window')
+	this.toggle = ConfigWindow_toggle
 
-    this.content  = document.createElement('div')
-      this.main.appendChild(this.content)
-      this.content.style.display = GM_getValue("config") ? 'block' : 'none'
+	this.main     = document.createElement('div')
+	this.main.style.position = 'fixed'
+	this.main.style.top  = 0
+	this.main.style.left = 0
+	this.main.style.background = 'white'
+	this.main.style.zIndex = 9999
+	//this.main.style.border = "black solid 1px"
+ 
+	this.titlebar = document.createElement('div')
+	this.main.appendChild(this.titlebar)
+	this.titlebar.style.border = "black solid 1px"
+	
+	open = document.createElement('img')
+	this.titlebar.appendChild(open)
+	open.src = GM_getValue("config") ? 'http://meurgues.fr/images/icon_drop_down.gif' : 'http://meurgues.fr/images/icon_drop_down_up.gif'
+	open.addEventListener('click',
+		function (e) {
+			document.configWindow.toggle()
+		},
+		false
+	);
+
+	title = document.createElement('span')
+	this.titlebar.appendChild(title)
+	title.textContent = " Fenêtre de Configuration"
+
+	this.content  = document.createElement('div')
+	this.main.appendChild(this.content)
+	this.content.style.display = GM_getValue("config") ? 'block' : 'none'
   
       opacity = document.createElement('div')
         box = document.createElement('input')
@@ -168,86 +167,31 @@ function PreviewWindow(title) {
   this.setVisible     = PreviewWindow_setVisible
   this.setID          = PreviewWindow_setID
   
-  this.menu    = document.createElement('div')
-  closebutton = document.createElement('img')
-  closebutton.src = 'http://meurgues.fr/images/icon_close_toast.gif'
-  closebutton.addEventListener('click',
-                                function (e) {
-                                  document.previewWindow.setVisible(false)
-                                },
-                                false);
-  this.menu.appendChild(closebutton)
-  this.title = document.createElement('span')
-  this.title.textContent = title
-  this.title.id = 'previewTitle'
-  this.menu.appendChild(this.title)
-  this.answer = document.createElement('form')
-  this.answer.style.display = 'inline'
-  this.answer.method = 'post'
-  this.answer.action = 'reponseN.php'
-  button = document.createElement('input')
-  button.value = 'submit'
-  button.type = 'image'
-  button.src = 'http://meurgues.fr/images/reponse.gif'
-  this.answer.appendChild(button)
-  hidden = document.createElement('input')
-  hidden.type = 'hidden'
-  hidden.value = 0
-  hidden.name = 'num'
-  this.answer.appendChild(hidden) 
-  this.menu.appendChild(this.answer)
-    
-  this.content = document.createElement('div')
-  this.content.style.overflowY = 'scroll';
-  this.content.style.height = 300-15;
-
   this.main       = document.createElement('div')
-  this.main.appendChild(this.menu)
-  this.main.appendChild(this.content)
-
   this.main.id = "preview"
-  this.main.style.position = 'fixed'
-  this.main.style.zIndex = 9999;
-  this.main.style.height = 300;
-  this.main.style.left = 0;
-  this.main.style.visibility = 'hidden';
-  this.main.style.background = 'lightgrey'  
-
+  this.main.title = title
+  
   document.previewWindow = this
 
   // add preview element to the body
   body = document.getElementsByTagName('BODY')[0];
   body.appendChild(this.main);
+  
+  $(this.main).dialog({ autoOpen: false , draggable: false, resizable: true, title: titre, height: 400, width: 500, modal: true});
 }
-
-function PreviewWindow_setTitle(titre) {
-  this.title.textContent = titre
-}
-
-function PreviewWindow_setHTMLContent(content) {
-  this.content.innerHTML = content
-}
-
-function PreviewWindow_setDOMContent(content) {
-  while (this.content.firstChild) this.content.removeChild(this.content.firstChild)
-  this.content.appendChild(content)
-}
-
-function PreviewWindow_setVisible(visible) {
-  if (visible) {
-    window = document.defaultView
-    this.main.style.top = window.innerHeight - 300
-    this.main.style.width = window.innerWidth;
-
-    this.main.style.visibility = 'visible';
-		$(this.main).slideDown();
-  } else {
-    this.main.style.visibility = 'hidden'
-	}
-}
-
-function PreviewWindow_setID(id) {
-  this.answer.lastChild.value = id
+  
+function BuildWindow(titre,content) {
+	var dialog = document.createElement('div')
+	dialog.title = "no title"
+	dialog.appendChild(content)
+	
+	// add preview element to the body
+	body = document.getElementsByTagName('BODY')[0];
+	body.appendChild(dialog);
+  
+	dialogwidth = window.innerWidth*4/5;
+	dialogheight = window.innerHeight*4/5;
+	$(dialog).dialog({draggable: false, resizable: true, title: titre, height: dialogheight, width: dialogwidth, modal: true});
 }
 
 function Color(diff) {
@@ -415,18 +359,22 @@ function ReWrite(par) {
 }
 
 function Init() {
+	// css files pour jquery ui
+	$('head').append("<link href='http://jquery-ui.googlecode.com/svn/tags/latest/themes/humanity/ui.all.css' type='text/css' rel='stylesheet'>");
 
 	if (GM_getValue("background")) {
 	  body = document.getElementsByTagName('BODY')[0]
 	  body.style.background = document.defaultColor;
 	}
 
+	// reformater les fils de discussion
 	allTextareas = document.getElementsByTagName('P');
 	for (var i = 0; i < allTextareas.length; i++) {
 	    thisTextarea = allTextareas[i];
 	    ReWrite(thisTextarea);
 	}
 
+	// ajouter le folding
 	allTextareas = Array.filter( document.getElementsByTagName('img'), function(elem){
 	   return elem.className == 'folding';
 	 });
@@ -450,6 +398,7 @@ function Init() {
 	                                  false);
 	}
 
+	// ajouter la preview des messages
 	allTextareas = Array.filter(document.getElementsByTagName('img'),
 	                            function(elem) { return elem.className == 'humeur';}
 	                           );
@@ -457,38 +406,32 @@ function Init() {
 	    thisTextarea = allTextareas[i];
 	    
 	    thisTextarea.addEventListener('click',
-	                                  function (e) {
-	                                    a=e.currentTarget.nextSibling;
-	                                    
-	                                    document.previewWindow.setTitle(a.text)
-	                                    document.previewWindow.setVisible(true)
-	                                    document.previewWindow.setHTMLContent("<em>loading message...</em>")
-	                                    document.previewWindow.setID(a.id)
-	                                    
-	                                    requestPage(a.href,
-	                                                function (xhr) {
-	                                                  if (xhr.readyState == 4) {
-	                                                    text = xhr.responseText;
+			function (e) {
+				a=e.currentTarget.nextSibling;	
 
-	                                                    preparepreview = document.createElement('div')
-	                                                    preparepreview.innerHTML = text;
-	                                                    tables = Array.filter(preparepreview.getElementsByTagName('table'),
-	                                                                          function(elem){ 
-	                                                                            return elem.className == 'dispmsg';
-	                                                                          }
-	                                                                         );
-	                                                    table = tables[0];
-	                                                    table = table.lastChild.lastChild.previousSibling.firstChild.firstChild.nextSibling
-	                                                    
-	                                                    document.previewWindow.setDOMContent(table)
-	                                                  }
-	                                                }
-	                                               );
-	                                  },
-	                                  false);
+				requestPage(a.href,
+					function (xhr) {
+						if (xhr.readyState == 4) {
+							text = xhr.responseText;
+
+							preparepreview = document.createElement('div')
+							preparepreview.innerHTML = text;
+							tables = Array.filter(preparepreview.getElementsByTagName('table'),
+										function(elem){ 
+											return elem.className == 'dispmsg';
+										}                                                                       );
+							table = tables[0];
+							table = table.lastChild.lastChild.previousSibling.firstChild.firstChild.nextSibling
+
+							BuildWindow(a.text,table)
+							//$(".preview").dialog("open");
+						}
+					}
+				);
+			},false
+		);
 	}
 
-	previewwindow = new PreviewWindow("empty")
 	configwindow = new ConfigWindow()
 
 	body.style.backgroundAttachment = 'fixed';
@@ -500,20 +443,4 @@ function Init() {
 	*/
 }
 
-// Add jQuery
-var GM_JQ = document.createElement('script');
-GM_JQ.src = 'http://jquery.com/src/jquery-latest.js';
-GM_JQ.type = 'text/javascript';
-document.getElementsByTagName('head')[0].appendChild(GM_JQ);
-
-// Check if jQuery's loaded
-function GM_wait() {
-	if(typeof unsafeWindow.jQuery == 'undefined') { window.setTimeout(GM_wait,100); }
-	else { $ = unsafeWindow.jQuery; letsJQuery(); }
-}
-GM_wait();
-
-// All your GM code must be inside this function
-function letsJQuery() {
-	Init();
-}
+Init();
